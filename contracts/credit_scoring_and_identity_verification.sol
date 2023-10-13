@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 // Interface for an off-chain identity verification service
 interface IdentityVerificationService {
+    address owner;
+
     function verifyIdentity(address user) external view returns (bool);
     function getCreditScore(address user) external view returns (uint256);
 }
 
 // Credit Score and Identity Verification Contract
-contract IdentityVerification is Ownable {
+contract IdentityVerification {
     IdentityVerificationService public verificationService;
 
     mapping(address => bool) public isVerified;
@@ -19,14 +20,21 @@ contract IdentityVerification is Ownable {
     event IdentityVerified(address indexed user, bool isVerified, uint256 creditScore);
     event CheckBalance(string text, uint amount);
 
-    // Uncomment the constructor and complete argument details in scripts/deploy.ts to deploy the contract with arguments
+    //complete argument details in scripts/deploy.ts to deploy the contract with arguments
 
-    // constructor(address _verificationServiceAddress) {
-    //     verificationService = IdentityVerificationService(_verificationServiceAddress);
-    // }
+    constructor(address _verificationServiceAddress) {
+        verificationService = IdentityVerificationService(_verificationServiceAddress);
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "Only owner can call this function");
+        _;
+    }
 
     // Verify the identity of a user and record their credit score
     function verifyIdentityAndScore(address user) external onlyOwner {
+        require(user != address(0), "Invalid address");
         require(!isVerified[user], "User is already verified");
 
         bool verified = verificationService.verifyIdentity(user);
@@ -39,12 +47,9 @@ contract IdentityVerification is Ownable {
     }
     
     function getBalance(address user_account) external returns (uint){
-    
-       string memory data = "User Balance is : ";
        uint user_bal = user_account.balance;
-       emit CheckBalance(data, user_bal );
+       emit CheckBalance(user_bal);
        return (user_bal);
-
     }
 }
 
