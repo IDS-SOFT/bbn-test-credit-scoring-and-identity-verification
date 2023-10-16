@@ -18,7 +18,7 @@ contract IdentityVerification {
     mapping(address => uint256) public creditScores;
 
     event IdentityVerified(address indexed user, bool isVerified, uint256 creditScore);
-    event CheckBalance(string text, uint amount);
+    event CheckBalance(uint amount);
 
     //complete argument details in scripts/deploy.ts to deploy the contract with arguments
 
